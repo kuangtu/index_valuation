@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 from WindPy import *
+import pandas as pd
 
 def get_tradeDaysStr(tradeDate):
     '''
@@ -49,6 +50,8 @@ def get_tradeDaysStr(tradeDate):
         startDate = str(year - 2) + "-07-01"
         endDate = str(year - 1) + "-09-30"
 
+    return startDate, endDate
+
 
 def get_stk_report(tradeDate):
     '''
@@ -57,11 +60,27 @@ def get_stk_report(tradeDate):
     :return:
     '''
 
-    tradeDaysStr = get_tradeDaysStr(tradeDate)
-    print(tradeDaysStr)
+    startDate, endDate = get_tradeDaysStr(tradeDate)
+    print(startDate, endDate)
+
+def getIdxCons(indexcode, tradeDate):
+    '''
+    得到指数成分券
+    :param indexcode:
+    :return: list
+    '''
+    queryStr = "date=" + tradeDate + ";windcode=" + indexcode
+    wind_res = w.wset("sectorconstituent", queryStr)
+    # print(wind_res)
+    # print(wind_res.Codes)
+    # print(wind_res.Fields)
+    df = pd.DataFrame(wind_res.Data, index= wind_res.Fields,columns=wind_res.Codes)
+    cons = df.T
+    print(cons)
 
 
 if __name__ == '__main__':
-    # w.start()
+    w.start()
     tradeDate = "2019-04-23"
-    get_stk_report(tradeDate)
+    getIdxCons("000016.SH", tradeDate)
+    # get_stk_report(tradeDate)

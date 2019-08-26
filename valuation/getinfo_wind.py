@@ -1,16 +1,14 @@
 # -*- coding: UTF-8 -*-
 from WindPy import *
 
-def get_tradeDays(tradeDate):
+def get_tradeDaysStr(tradeDate):
     '''
     根据当前日期，得到交易日范围
     1、如果是T年的5月1日之前，采用T-1年的前三季度报告，以及T-2年的第4季度报告
-    （1）日期从T-2年的7月1日开始，至T-1年的12月31日
-    （2）此时得到了6个财务报告期，序号为T-2-Q3、T-2-Q4，T-1-Q1、T-1-Q2、T-1-Q3、T-1-Q4
+    （1）日期从T-2年的7月1日开始，至T-1年的09月30日
+    （2）此时得到了5个财务报告期，序号为T-2-Q3、T-2-Q4，T-1-Q1、T-1-Q2、T-1-Q3
     （3）净利润r1 = T-2-Q4 - T-2-Q3、
-        r2 = T-1-Q2 - T-1-Q1、
-        r3 = T-1-Q3 - T-1-Q2
-        r4 = T-1-Q4 - T-1-Q3
+        r2=T-1-Q3
     （4）然后结合当期的股本计算A股净利润
     （5）wind中日期范围是“YYYYMDD(T-2)-07-01”至“YYYYMMD（T-1）-09-30”
     2、如果是5月1日至9月1日之前，采用T年的一季度报告，以及T-1年第2、3、4季度财报
@@ -37,8 +35,20 @@ def get_tradeDays(tradeDate):
     （4）然后结合当期的股本计算A股净利润
     （5）wind中日期范围是“YYYYMMDD(-1)-07-01”至“YYYYMMDD-09-30”
     :param tradeDate:
-    :return:
+    :return: tradeDayStr，wind
     '''
+
+    # 得到交易月和日
+    startDate = ""
+    endDate = ""
+    year = int(tradeDate[:4])
+    month_and_days = tradeDate[5:10]
+    print(month_and_days)
+    tradeDayStr = ""
+    if month_and_days < "05-01":
+        startDate = str(year - 2) + "-07-01"
+        endDate = str(year - 1) + "-09-30"
+
 
 def get_stk_report(tradeDate):
     '''
@@ -47,8 +57,11 @@ def get_stk_report(tradeDate):
     :return:
     '''
 
+    tradeDaysStr = get_tradeDaysStr(tradeDate)
+    print(tradeDaysStr)
+
 
 if __name__ == '__main__':
     # w.start()
-    tradeDate = "20190823"
+    tradeDate = "2019-04-23"
     get_stk_report(tradeDate)

@@ -66,6 +66,28 @@ def get_tradeDaysStr(tradeDate):
         datetype = 4
     return startDate, endDate, datetype
 
+def cal_stk_mkt_np(report_df, cls_df, datetype):
+    '''
+    计算股票最近四个计算的净利润，以及当日的A股总市值
+    :param report_df:
+    :param cls_df:
+    :param datetype:
+    :return:
+    '''
+
+    # 2类型，计算的时间在T年5月1日到9月1日之间
+    # 计算方法是T年的1季报，T-1年的2、3、4季报，由T年的年报减去一季度
+    # 需要注意计算净利润的时候，需要使用A股数量计算
+    # 此时得到df索引顺序为T-1年1季报，2季报，3季报、4季报，T年的1季报
+    if datetype == 2:
+        t_1_q2_q4 = report_df.iloc[3, 4] - report_df.iloc[0, 4]
+        t_q1 = report_df.iloc[4, 4]
+        ashare_np_sum = t_1_q2_q4 + t_q1
+        ashare_mkt = cls_df.iloc[0, 2]
+        syl = ashare_mkt / ashare_np_sum
+        print(syl)
+
+
 
 def get_stk_report(tradeDate, conslit):
     '''
@@ -75,18 +97,29 @@ def get_stk_report(tradeDate, conslit):
     '''
 
     startDate, endDate, datetype = get_tradeDaysStr(tradeDate)
+    print(datetype)
     print(startDate, endDate)
     for cons in conslist:
         wsd_res = w.wsd(cons, "total_shares,share_totala,np_belongto_parcomsh", startDate, endDate,
               "unit=1;rptType=1;Period=Q;Days=Alldays")
-        print (wsd_res)
-        df = pd.DataFrame(wsd_res.Data, index=wsd_res.Fields, columns=wsd_res.Times)
-        report = df.T
+        print(wsd_res)
+        np_df = pd.DataFrame(wsd_res.Data, index=wsd_res.Fields, columns=wsd_res.Times)
+        report_df = np_df.T
+        print(report_df)
+        # 计算A股占比，计算出A股市值占比
+        report_df['ASHARE_PCT'] = report_df['SHARE_TOTALA'] / report_df['TOTAL_SHARES']
+        report_df['ASHARE_NP'] = report_df['NP_BELONGTO_PARCOMSH'] * report_df['ASHARE_PCT']
         # 将数据整合，得到当天需要计算的净利润、股本
-        print(report)
+        print(report_df)
+        wss_res = w.wss(cons, "close,share_totala", "tradeDate=" + tradeDate + ";priceAdj=U;cycle=D")
+        perf_df = pd.DataFrame(wss_res.Data, index=wss_res.Fields, columns=wss_res.Times)
+        cls_df = perf_df.T
+        cls_df['ashare_mkt'] = cls_df['cls'] * cls_df['ashare']
+        print(cls_df)
+        cal_stk_mkt_np(report_df, cls_df, datetype)
 
-        wss_res = w.wss(cons, "close", "tradeDate=" + tradeDate + ";priceAdj=U;cycle=D")
-        print(wss_res)
+
+
         break
 
 
@@ -110,9 +143,11 @@ def getIdxCons(indexcode, tradeDate):
     return cons['windcode'].tolist()
 
 
+
 if __name__ == '__main__':
-    w.start()
-    tradeDate = "2019-08-26"
+    # w.start()
+    pd.set_option('display.max_columns', 999)
+    tradeDate = "2019-08-27"
     conslist=['600000.SH']
     # cons = getIdxCons("000016.SH", tradeDate)
     get_stk_report(tradeDate, conslist)

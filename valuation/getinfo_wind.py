@@ -2,6 +2,7 @@
 from WindPy import *
 import pandas as pd
 
+
 def get_tradeDaysStr(tradeDate):
     '''
     根据当前日期，得到交易日范围
@@ -42,6 +43,7 @@ def get_tradeDaysStr(tradeDate):
     # 得到交易月和日
     startDate = ""
     endDate = ""
+    datetype = -1
     year = int(tradeDate[:4])
     month_and_days = tradeDate[5:10]
     print(month_and_days)
@@ -49,19 +51,44 @@ def get_tradeDaysStr(tradeDate):
     if month_and_days < "05-01":
         startDate = str(year - 2) + "-07-01"
         endDate = str(year - 1) + "-09-30"
+        datetype = 1
+    elif month_and_days >= '05-01' and month_and_days < '09-01':
+        startDate = str(year - 1) + "-01-01"
+        endDate = str(year) + "-03-31"
+        datetype = 2
+    elif month_and_days >= '09-01' and month_and_days < '11-01':
+        startDate = str(year - 1) + '-04-01'
+        endDate = str(year - 1) + '-06-30'
+        datetype = 3
+    elif month_and_days >= '11-01':
+        startDate = str(year - 1) + '-07-01'
+        endDate = str(year) + '-09-30'
+        datetype = 4
+    return startDate, endDate, datetype
 
-    return startDate, endDate
 
-
-def get_stk_report(tradeDate):
+def get_stk_report(tradeDate, conslit):
     '''
     得到最近四个季度的报告，需要根据当前的日期，得到交易日范围
     :param tradeDate:
     :return:
     '''
 
-    startDate, endDate = get_tradeDaysStr(tradeDate)
+    startDate, endDate, datetype = get_tradeDaysStr(tradeDate)
     print(startDate, endDate)
+    for cons in conslist:
+        wsd_res = w.wsd(cons, "total_shares,share_totala,np_belongto_parcomsh", startDate, endDate,
+              "unit=1;rptType=1;Period=Q;Days=Alldays")
+        print (wsd_res)
+        df = pd.DataFrame(wsd_res.Data, index=wsd_res.Fields, columns=wsd_res.Times)
+        report = df.T
+        # 将数据整合，得到当天需要计算的净利润、股本
+        print(report)
+
+        wss_res = w.wss(cons, "close", "tradeDate=" + tradeDate + ";priceAdj=U;cycle=D")
+        print(wss_res)
+        break
+
 
 def getIdxCons(indexcode, tradeDate):
     '''
@@ -74,13 +101,18 @@ def getIdxCons(indexcode, tradeDate):
     # print(wind_res)
     # print(wind_res.Codes)
     # print(wind_res.Fields)
-    df = pd.DataFrame(wind_res.Data, index= wind_res.Fields,columns=wind_res.Codes)
+    df = pd.DataFrame(
+        wind_res.Data,
+        index=wind_res.Fields,
+        columns=wind_res.Codes)
     cons = df.T
-    print(cons)
+
+    return cons['windcode'].tolist()
 
 
 if __name__ == '__main__':
     w.start()
-    tradeDate = "2019-04-23"
-    getIdxCons("000016.SH", tradeDate)
-    # get_stk_report(tradeDate)
+    tradeDate = "2019-08-26"
+    conslist=['600000.SH']
+    # cons = getIdxCons("000016.SH", tradeDate)
+    get_stk_report(tradeDate, conslist)

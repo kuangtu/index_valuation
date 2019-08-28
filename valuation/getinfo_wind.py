@@ -148,6 +148,6 @@ if __name__ == '__main__':
     # w.start()
     pd.set_option('display.max_columns', 999)
     tradeDate = "2019-08-27"
-    conslist=['600000.SH']
+    conslist=['600519.SH']
     # cons = getIdxCons("000016.SH", tradeDate)
     get_stk_report(tradeDate, conslist)

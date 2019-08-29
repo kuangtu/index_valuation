@@ -75,6 +75,17 @@ def cal_stk_mkt_np(report_df, cls_df, datetype):
     :return:
     '''
 
+    #1类型，计算的时间在小于T年的5月1日
+    #计算方式T-1年的1、2、3季报，T-2年的四季报
+    #此时得到的df索引顺序为T-2年3季报、4季报，T-1年1季报、2季报、3季报
+    if datetype == 1:
+        t_1_q1_q3 = report_df.iloc[4, 4]
+        t_2_q4 = report_df.iloc[1,4] - report_df.iloc[0,4]
+        ashare_np_sum = t_1_q1_q3 + t_2_q4
+        ashare_mkt = cls_df.iloc[0, 2]
+        syl = ashare_mkt / ashare_np_sum
+        print (syl)
+
     # 2类型，计算的时间在T年5月1日到9月1日之间
     # 计算方法是T年的1季报，T-1年的2、3、4季报，由T年的年报减去一季度
     # 需要注意计算净利润的时候，需要使用A股数量计算

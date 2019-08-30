@@ -98,6 +98,28 @@ def cal_stk_mkt_np(report_df, cls_df, datetype):
         syl = ashare_mkt / ashare_np_sum
         print(syl)
 
+    # 3类型，计算的时间在T年9月1日到11月1日之间
+    #计算方法是T年的1、2季报，T-1年的3、4季报
+    #此时得到df索引顺序为T-1年2季报、3季报、4季报、T年1季报、2季报
+    if datetype == 3:
+        t_1_q3_q4 = report_df.iloc[2, 4] - report_df.iloc[0, 4]
+        t_q1_q2 = report_df.iloc[4,4]
+        ashare_np_sum = t_1_q3_q4 + t_q1_q2
+        ashare_mkt = cls_df.iloc[0, 2]
+        syl = ashare_mkt / ashare_np_sum
+        print (syl)
+
+    # 4类型，计算的时间在T年的11月1日之后
+    # 计算方法是T年的1、2、3季报，T-1年的4季报
+    # 此时得到的df索引顺序为T-1年的3、4季报，T年的1季报、2季报、3季报
+    if datetype == 4:
+        t_1_q4 = report_df.iloc[1, 4] - report_df.iloc[0, 4]
+        t_2_q1_q2_q3 = report_df.iloc[4, 4]
+        ashare_np_sum = t_1_q4 + t_2_q1_q2_q3
+        ashare_mkt = cls_df.iloc[0, 2]
+        syl = ashare_mkt / ashare_np_sum
+        print(syl)
+
 
 
 def get_stk_report(tradeDate, conslit):

@@ -148,7 +148,7 @@ def get_stk_report(tradeDate, conslit):
         wss_res = w.wss(cons, "close,share_totala", "tradeDate=" + tradeDate + ";priceAdj=U;cycle=D")
         perf_df = pd.DataFrame(wss_res.Data, index=wss_res.Fields, columns=wss_res.Times)
         cls_df = perf_df.T
-        cls_df.to_csv(cons + "cls.csv")
+        cls_df.to_csv(cons + "cls" + tradeDate + ".csv")
         cls_df['ashare_mkt'] = cls_df['cls'] * cls_df['ashare']
         print(cls_df)
         break
@@ -176,7 +176,6 @@ def getIdxCons(indexcode, tradeDate):
     cons.to_csv("../data/000016cons.csv")
 
     return cons['wind_code'].tolist()
-
 
 
 if __name__ == '__main__':

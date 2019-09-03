@@ -58,7 +58,7 @@ def get_tradeDaysStr(tradeDate):
         datetype = 2
     elif month_and_days >= '09-01' and month_and_days < '11-01':
         startDate = str(year - 1) + '-04-01'
-        endDate = str(year - 1) + '-06-30'
+        endDate = str(year) + '-06-30'
         datetype = 3
     elif month_and_days >= '11-01':
         startDate = str(year - 1) + '-07-01'
@@ -139,7 +139,7 @@ def get_stk_report(tradeDate, conslit):
         np_df = pd.DataFrame(wsd_res.Data, index=wsd_res.Fields, columns=wsd_res.Times)
         report_df = np_df.T
         print(report_df)
-        report_df.to_csv(cons+"report.csv")
+        report_df.to_csv("../data/" + tradeDate + "/" + cons + "report.csv")
         # 计算A股占比，计算出A股市值占比
         report_df['ASHARE_PCT'] = report_df['SHARE_TOTALA'] / report_df['TOTAL_SHARES']
         report_df['ASHARE_NP'] = report_df['NP_BELONGTO_PARCOMSH'] * report_df['ASHARE_PCT']
@@ -148,12 +148,10 @@ def get_stk_report(tradeDate, conslit):
         wss_res = w.wss(cons, "close,share_totala", "tradeDate=" + tradeDate + ";priceAdj=U;cycle=D")
         perf_df = pd.DataFrame(wss_res.Data, index=wss_res.Fields, columns=wss_res.Times)
         cls_df = perf_df.T
-        cls_df.to_csv(cons + "cls" + tradeDate + ".csv")
-        cls_df['ashare_mkt'] = cls_df['cls'] * cls_df['ashare']
         print(cls_df)
-        break
+        cls_df.to_csv("../data/" + tradeDate + "/" + cons + "cls.csv")
+        cls_df['ASHARE_MKT'] = cls_df['CLOSE'] * cls_df['SHARE_TOTALA']
         cal_stk_mkt_np(report_df, cls_df, datetype)
-        break
 
 
 def getIdxCons(indexcode, tradeDate):
@@ -173,7 +171,7 @@ def getIdxCons(indexcode, tradeDate):
         columns=wind_res.Codes)
     cons = df.T
 
-    cons.to_csv("../data/000016cons.csv")
+    cons.to_csv("../data/" + tradeDate + "/" + indexcode + "cons.csv")
 
     return cons['wind_code'].tolist()
 
@@ -181,7 +179,7 @@ def getIdxCons(indexcode, tradeDate):
 if __name__ == '__main__':
     w.start()
     pd.set_option('display.max_columns', 999)
-    tradeDate = "2019-08-30"
-    # conslist=['600519.SH']
+    tradeDate = "2019-09-02"
+    conslist=['600000.SH']
     conslist = getIdxCons("000016.SH", tradeDate)
     get_stk_report(tradeDate, conslist)

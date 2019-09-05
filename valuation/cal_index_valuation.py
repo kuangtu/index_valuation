@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import pandas as pd
+import numpy as np
 
 def get_dataType(tradeDate):
     '''
@@ -52,6 +53,23 @@ def get_dataType(tradeDate):
         datetype = 4
     return datetype
 
+def read_pro_mkt(reportdf, clsdf, datatype):
+    '''
+    读取报告和市值数据
+    :param reportdf:
+    :param clsdf:
+    :return:
+    '''
+    #如果数据类型是3，表示交易日期在<= 09-01 <11-01之间
+    if datatype == 3:
+        t_1_q3_q4 = reportdf.iloc[2, 4] - reportdf.iloc[0, 4]
+        t_q1_q2 = reportdf.iloc[4,4]
+        ashare_np_sum = t_1_q3_q4 + t_q1_q2
+        ashare_mkt = clsdf.iloc[0, 2]
+
+    return ashare_np_sum, ashare_mkt
+
+
 def load_stk_data(tradeDate, cons_list, datatype):
     '''
     根据数据类型和交易日得到数据
@@ -60,14 +78,31 @@ def load_stk_data(tradeDate, cons_list, datatype):
     :return:
     '''
 
-    #如果数据类型是3，表示交易日期在<= 09-01 <11-01之间
-    if datatype == 3:
-        # 遍历指数样本的报告和市值信息
-        for cons in cons_list:
-            reportpath = "../data/" + tradeDate + "/" + cons + "report.csv"
-            print(reportpath)
-            clspath = "../data/" + tradeDate + "/" +  cons + "cls.csv"
-            print(clspath)
+    # 遍历指数样本的报告和市值信息
+    profit_sum = 0
+    mkt_sum = 0
+    for cons in cons_list:
+        reportpath = "../data/" + tradeDate + "/" + cons + "report.csv"
+        reportdf = pd.read_csv(reportpath, index_col=0)
+        reportdf.loc[:, ['TOTAL_SHARES', 'SHARE_TOTALA']] \
+            = reportdf.loc[:, ['TOTAL_SHARES', 'SHARE_TOTALA']].fillna(method='bfill')
+        reportdf['ASHARE_PCT'] = reportdf['SHARE_TOTALA'] / reportdf['TOTAL_SHARES']
+        reportdf['ASHARE_NP'] = reportdf['NP_BELONGTO_PARCOMSH'] * reportdf['ASHARE_PCT']
+
+        clspath = "../data/" + tradeDate + "/" +  cons + "cls.csv"
+        clsdf = pd.read_csv(clspath, index_col=0)
+        clsdf['ASHARE_MKT'] = clsdf['CLOSE'] * clsdf['SHARE_TOTALA']
+        profit, mkt = read_pro_mkt(reportdf, clsdf, datatype)
+        print(cons)
+        print(mkt/profit)
+        if profit <= 0:
+            print("profit less zero")
+        profit_sum += profit
+        mkt_sum += mkt
+
+    return profit_sum, mkt_sum
+
+
 
 
 def load_cons(tradeDate, index_code):
@@ -87,14 +122,15 @@ def cal_idx_valuation(tradeDate, index_code):
     '''
 
     datatype = get_dataType(tradeDate)
-    print(datatype)
 
     idx_cons = load_cons(tradeDate, index_code)
     print(idx_cons)
-    load_stk_data(tradeDate, idx_cons, datatype)
+    profit_sum, mkt_sum = load_stk_data(tradeDate, idx_cons, datatype)
+    print(mkt_sum/profit_sum)
 
 
 if __name__ == '__main__':
+    pd.set_option('display.max_columns', 999)
     tradeDate = "2019-09-02"
     index_code = '000016.SH'
     cal_idx_valuation(tradeDate, index_code)

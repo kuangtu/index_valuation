@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+import pandas as pd
+
 def get_dataType(tradeDate):
     '''
     根据当前日期，得到交易日范围
@@ -50,7 +52,7 @@ def get_dataType(tradeDate):
         datetype = 4
     return datetype
 
-def load_data(tradeDate, index_code, datatype):
+def load_stk_data(tradeDate, cons_list, datatype):
     '''
     根据数据类型和交易日得到数据
     :param tradeDate:
@@ -60,7 +62,21 @@ def load_data(tradeDate, index_code, datatype):
 
     #如果数据类型是3，表示交易日期在<= 09-01 <11-01之间
     if datatype == 3:
+        # 遍历指数样本的报告和市值信息
+        for cons in cons_list:
+            reportpath = "../data/" + tradeDate + "/" + cons + "report.csv"
+            print(reportpath)
+            clspath = "../data/" + tradeDate + "/" +  cons + "cls.csv"
+            print(clspath)
 
+
+def load_cons(tradeDate, index_code):
+    filepath = "../data/" + tradeDate + "/" + index_code + "cons.csv"
+    # print(filepath)
+    consdf = pd.read_csv(filepath, index_col=0)
+    conslist = consdf['wind_code'].tolist()
+    # print(consdf)
+    return conslist
 
 def cal_idx_valuation(tradeDate, index_code):
     '''
@@ -73,7 +89,9 @@ def cal_idx_valuation(tradeDate, index_code):
     datatype = get_dataType(tradeDate)
     print(datatype)
 
-    load_data(tradeDate, index_code, datatype)
+    idx_cons = load_cons(tradeDate, index_code)
+    print(idx_cons)
+    load_stk_data(tradeDate, idx_cons, datatype)
 
 
 if __name__ == '__main__':

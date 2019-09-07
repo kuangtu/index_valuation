@@ -89,21 +89,21 @@ def load_stk_data(tradeDate, cons_list, datatype):
         reportdf['ASHARE_PCT'] = reportdf['SHARE_TOTALA'] / reportdf['TOTAL_SHARES']
         reportdf['ASHARE_NP'] = reportdf['NP_BELONGTO_PARCOMSH'] * reportdf['ASHARE_PCT']
 
+        if cons == "600029.SH":
+            print(reportdf)
+
         clspath = "../data/" + tradeDate + "/" +  cons + "cls.csv"
         clsdf = pd.read_csv(clspath, index_col=0)
         clsdf['ASHARE_MKT'] = clsdf['CLOSE'] * clsdf['SHARE_TOTALA']
         profit, mkt = read_pro_mkt(reportdf, clsdf, datatype)
-        print(cons)
-        print(mkt/profit)
+        print(cons, mkt/profit)
+        # print(mkt/profit)
         if profit <= 0:
             print("profit less zero")
         profit_sum += profit
         mkt_sum += mkt
 
     return profit_sum, mkt_sum
-
-
-
 
 def load_cons(tradeDate, index_code):
     filepath = "../data/" + tradeDate + "/" + index_code + "cons.csv"
@@ -131,6 +131,6 @@ def cal_idx_valuation(tradeDate, index_code):
 
 if __name__ == '__main__':
     pd.set_option('display.max_columns', 999)
-    tradeDate = "2019-09-02"
+    tradeDate = "2019-09-05"
     index_code = '000016.SH'
     cal_idx_valuation(tradeDate, index_code)

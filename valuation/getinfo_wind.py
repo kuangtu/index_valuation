@@ -179,7 +179,7 @@ def getIdxCons(indexcode, tradeDate):
 if __name__ == '__main__':
     w.start()
     pd.set_option('display.max_columns', 999)
-    tradeDate = "2019-09-02"
-    conslist=['600000.SH']
+    tradeDate = "2019-09-05"
+    # conslist=['600000.SH']
     conslist = getIdxCons("000016.SH", tradeDate)
     get_stk_report(tradeDate, conslist)

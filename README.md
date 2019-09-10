@@ -112,3 +112,52 @@
 | 2018/9/30  | 24733552720          | 1256197800   | 1256197800   |
 
 - T-1年的四季报减去三季报，得到第四季度的数据，然后加上T年的三季报，得到最近四个季度的净利润。
+
+## wind数据提取
+
+### 指数成分股提取
+
+通过wind终端API接口，提取指数成分股。
+
+```python
+ wind_res = w.wset("sectorconstituent", queryStr)
+```
+
+然后将返回的结果转为DataFrame：
+
+```python
+    df = pd.DataFrame(
+        wind_res.Data,
+        index=wind_res.Fields,
+        columns=wind_res.Codes)
+    cons = df.T
+```
+
+### 指数季报提取
+
+```python
+wsd_res = w.wsd(cons, "total_shares,share_totala,np_belongto_parcomsh", startDate, endDate,"unit=1;rptType=1;Period=Q;Days=Alldays")
+```
+
+其中的起止时间，需要根据当前的日期，选择不同的时间范围：
+
+```python
+    if month_and_days < "05-01":
+        startDate = str(year - 2) + "-07-01"
+        endDate = str(year - 1) + "-09-30"
+        datetype = 1
+    elif month_and_days >= '05-01' and month_and_days < '09-01':
+        startDate = str(year - 1) + "-01-01"
+        endDate = str(year) + "-03-31"
+        datetype = 2
+    elif month_and_days >= '09-01' and month_and_days < '11-01':
+        startDate = str(year - 1) + '-04-01'
+        endDate = str(year) + '-06-30'
+        datetype = 3
+    elif month_and_days >= '11-01':
+        startDate = str(year - 1) + '-07-01'
+        endDate = str(year) + '-09-30'
+        datetype = 4
+```
+
+然后对于得到的季报数据按照之前的说明进行处理，计算得到最近四个季度的A股净利润及当天的A股市值，得到PE（TTM）。

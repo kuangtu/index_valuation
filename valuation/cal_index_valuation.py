@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import pandas as pd
 import numpy as np
+import sys
 
 def get_dataType(tradeDate):
     '''
@@ -131,6 +132,10 @@ def cal_idx_valuation(tradeDate, index_code):
 
 if __name__ == '__main__':
     pd.set_option('display.max_columns', 999)
-    tradeDate = "2019-09-05"
-    index_code = '000016.SH'
-    cal_idx_valuation(tradeDate, index_code)
+    if len(sys.argv) != 3:
+        print("parameter error")
+        sys.exit()
+
+    indexcode = str(sys.argv[1])
+    tradeDate = str(sys.argv[2])
+    cal_idx_valuation(tradeDate, indexcode)

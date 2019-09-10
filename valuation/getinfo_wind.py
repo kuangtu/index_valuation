@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from WindPy import *
 import pandas as pd
+import sys
 
 
 def get_tradeDaysStr(tradeDate):
@@ -179,7 +180,11 @@ def getIdxCons(indexcode, tradeDate):
 if __name__ == '__main__':
     w.start()
     pd.set_option('display.max_columns', 999)
-    tradeDate = "2019-09-05"
-    # conslist=['600000.SH']
-    conslist = getIdxCons("000016.SH", tradeDate)
+    if len(sys.argv) != 3:
+        print("parameter error")
+        sys.exit()
+
+    indexcode = str(sys.argv[1])
+    tradeDate = str(sys.argv[2])
+    conslist = getIdxCons(indexcode, tradeDate)
     get_stk_report(tradeDate, conslist)
